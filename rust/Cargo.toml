@@ -7,7 +7,6 @@ members = [
     "driver-ipc",
     "driver-logger",
     "virtual-display-driver-cli",
-    "pyvdd",
 ]
 
 [profile.release]

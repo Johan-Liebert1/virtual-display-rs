@@ -10,6 +10,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // all in one fell swoop. This is the only option for now
     //
     // For location of the content, see winlog/res/eventmsgs.rc
+    let res = 
     winres
         .append_rc_content(
             r#"
@@ -24,8 +25,12 @@ LANGUAGE 0x9, 0x1
 1 MESSAGETABLE "res/MSG00409.bin"
     "#,
         )
-        .compile()
-        .unwrap();
+        .compile();
+
+    match res {
+        Ok(_) => println!("nice"),
+        Err(err) => println!("fucking eerr {}", err),
+    }
 
     // need linked c runtime for umdf includes
     println!("cargo:rustc-link-lib=static=ucrt");
