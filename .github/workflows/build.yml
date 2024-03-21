@@ -57,15 +57,15 @@ jobs:
           $env:PRIVATE_KEY | Out-File -FilePath private.txt
           certutil -decode private.txt private.pfx
 
-          # - name: Export PR Private Certificate
-          #   if: github.event_name == 'pull_request'
-          #   run: cp .github/workflows/build_res/pr.pfx private.pfx
+      - name: Export PR Private Certificate
+        if: github.event_name == 'pull_request'
+        run: cp .github/workflows/build_res/pr.pfx private.pfx
 
-          # - name: Export Public Certificate
-          #   env:
-          #     PRIVATE_KEY_PASSWORD: ${{ github.event_name == 'pull_request' && '1234' || secrets.PRIVATE_KEY_PASSWORD }}
-          #   run: |
-          #     Get-PfxCertificate -FilePath private.pfx -Password (ConvertTo-SecureString -String "${{ env.PRIVATE_KEY_PASSWORD }}" -AsPlainText -Force) | Export-Certificate -FilePath DriverCertificate.cer -type CERT
+      - name: Export Public Certificate
+        env:
+          PRIVATE_KEY_PASSWORD: ${{ github.event_name == 'pull_request' && '1234' || secrets.PRIVATE_KEY_PASSWORD }}
+        run: |
+          Get-PfxCertificate -FilePath private.pfx -Password (ConvertTo-SecureString -String "${{ env.PRIVATE_KEY_PASSWORD }}" -AsPlainText -Force) | Export-Certificate -FilePath DriverCertificate.cer -type CERT
 
       - name: Build
         env:

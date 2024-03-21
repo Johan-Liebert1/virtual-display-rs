@@ -16,7 +16,7 @@ use wdf_umdf_sys::{
     IDDCX_ADAPTER_CAPS, IDDCX_ENDPOINT_DIAGNOSTIC_INFO, IDDCX_ENDPOINT_VERSION,
     IDDCX_FEATURE_IMPLEMENTATION, IDDCX_MONITOR, IDDCX_MONITOR_DESCRIPTION,
     IDDCX_MONITOR_DESCRIPTION_TYPE, IDDCX_MONITOR_INFO, IDDCX_SWAPCHAIN, IDDCX_TRANSMISSION_TYPE,
-    LUID, NTSTATUS, WDFDEVICE, WDFOBJECT, WDF_OBJECT_ATTRIBUTES,
+    LUID, NTSTATUS, WDFDEVICE, WDFOBJECT, WDF_OBJECT_ATTRIBUTES, IDDCX_CURSOR_CAPS, IDARG_IN_SETUP_HWCURSOR
 };
 use windows::{core::{w, GUID}, Win32::System::Threading::CreateEventA};
 
@@ -265,9 +265,9 @@ impl MonitorContext {
             let cursor_info = IDDCX_CURSOR_CAPS {
                 Size: size_of::<IDDCX_CURSOR_CAPS>() as u32,
                 AlphaCursorSupport: true,
-                MaxX: 64, //TODO figure out correct maximum value
-                MaxY: 64, //TODO figure out correct maximum value
-                ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT_NONE, //TODO play around with XOR cursors
+                MaxX: 64,
+                MaxY: 64,
+                ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT_NONE,
             };
 
             // prepare IddCxMonitorSetupHardwareCursor arguments
