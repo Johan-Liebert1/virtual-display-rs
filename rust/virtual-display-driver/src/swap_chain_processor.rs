@@ -255,16 +255,16 @@ impl MonitorContext {
             let mouse_event = unsafe {
                 CreateEventA(
                     None,
-                    false,
-                    false,
-                    "arbitraryMouseEventName",
+                    false.into_param(),
+                    false.into_param(),
+                    "arbitraryMouseEventName".into_param(),
                 ).unwrap()
             };
 
             // set up cursor capabilities
             let cursor_info = IDDCX_CURSOR_CAPS {
                 Size: size_of::<IDDCX_CURSOR_CAPS>() as u32,
-                AlphaCursorSupport: true,
+                AlphaCursorSupport: 1,
                 MaxX: 64,
                 MaxY: 64,
                 ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT_NONE,
