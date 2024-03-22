@@ -5,7 +5,7 @@ use wdf_umdf_sys::{
     IDARG_IN_ADAPTER_INIT, IDARG_IN_MONITORCREATE, IDARG_IN_SWAPCHAINSETDEVICE,
     IDARG_OUT_ADAPTER_INIT, IDARG_OUT_MONITORARRIVAL, IDARG_OUT_MONITORCREATE,
     IDARG_OUT_RELEASEANDACQUIREBUFFER, IDDCX_ADAPTER, IDDCX_MONITOR, IDDCX_SWAPCHAIN,
-    IDD_CX_CLIENT_CONFIG, NTSTATUS, WDFDEVICE, WDFDEVICE_INIT,
+    IDD_CX_CLIENT_CONFIG, NTSTATUS, WDFDEVICE, WDFDEVICE_INIT, IDARG_IN_SETUP_HWCURSOR,
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -263,7 +263,7 @@ pub unsafe fn IddCxMonitorSetupHardwareCursor(
     IddCxCall!(
         IddCxMonitorSetupHardwareCursor(
             MonitorObject,
-            hw_cursor,
+            hw_cursor
         )
     )
 }
