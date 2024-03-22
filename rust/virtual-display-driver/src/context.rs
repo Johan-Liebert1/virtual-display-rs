@@ -20,7 +20,7 @@ use wdf_umdf_sys::{
     WDFOBJECT, WDF_OBJECT_ATTRIBUTES,
 };
 use windows::{
-    core::{w, GUID, strings::PCSTR},
+    core::{w, GUID, PCSTR},
     Win32::System::Threading::CreateEventA,
 };
 
@@ -274,12 +274,12 @@ impl MonitorContext {
             // prepare IddCxMonitorSetupHardwareCursor arguments
             let hw_cursor = IDARG_IN_SETUP_HWCURSOR {
                 CursorInfo: cursor_info,
-                hNewCursorDataAvailable: &mut mouse_event as *mut std::ffi::c_void, // this event will be called when new cursor data is available
+                hNewCursorDataAvailable: &mut mouse_event as *mut _ as *mut std::ffi::c_void, // this event will be called when new cursor data is available
             };
 
             unsafe {
                 let status = IddCxMonitorSetupHardwareCursor(
-                    self.device.as_mut(),
+                    self.device.as_mut().unwrap(),
                     &hw_cursor as *const IDARG_IN_SETUP_HWCURSOR,
                 );
             }
