@@ -7,18 +7,22 @@ use std::{
 use anyhow::anyhow;
 use log::error;
 use wdf_umdf::{
-    IddCxAdapterInitAsync, IddCxError, IddCxMonitorArrival, IddCxMonitorCreate, WdfError,
-    WdfObjectDelete, WDF_DECLARE_CONTEXT_TYPE,
+    IddCxAdapterInitAsync, IddCxError, IddCxMonitorArrival, IddCxMonitorCreate,
+    IddCxMonitorSetupHardwareCursor, WdfError, WdfObjectDelete, WDF_DECLARE_CONTEXT_TYPE,
 };
 use wdf_umdf_sys::{
     DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY, HANDLE, IDARG_IN_ADAPTER_INIT, IDARG_IN_MONITORCREATE,
-    IDARG_OUT_ADAPTER_INIT, IDARG_OUT_MONITORARRIVAL, IDARG_OUT_MONITORCREATE, IDDCX_ADAPTER,
-    IDDCX_ADAPTER_CAPS, IDDCX_ENDPOINT_DIAGNOSTIC_INFO, IDDCX_ENDPOINT_VERSION,
-    IDDCX_FEATURE_IMPLEMENTATION, IDDCX_MONITOR, IDDCX_MONITOR_DESCRIPTION,
-    IDDCX_MONITOR_DESCRIPTION_TYPE, IDDCX_MONITOR_INFO, IDDCX_SWAPCHAIN, IDDCX_TRANSMISSION_TYPE,
-    LUID, NTSTATUS, WDFDEVICE, WDFOBJECT, WDF_OBJECT_ATTRIBUTES, IDDCX_CURSOR_CAPS, IDARG_IN_SETUP_HWCURSOR
+    IDARG_IN_SETUP_HWCURSOR, IDARG_OUT_ADAPTER_INIT, IDARG_OUT_MONITORARRIVAL,
+    IDARG_OUT_MONITORCREATE, IDDCX_ADAPTER, IDDCX_ADAPTER_CAPS, IDDCX_CURSOR_CAPS,
+    IDDCX_ENDPOINT_DIAGNOSTIC_INFO, IDDCX_ENDPOINT_VERSION, IDDCX_FEATURE_IMPLEMENTATION,
+    IDDCX_MONITOR, IDDCX_MONITOR_DESCRIPTION, IDDCX_MONITOR_DESCRIPTION_TYPE, IDDCX_MONITOR_INFO,
+    IDDCX_SWAPCHAIN, IDDCX_TRANSMISSION_TYPE, LUID, NTSTATUS, WDFDEVICE, WDFOBJECT,
+    WDF_OBJECT_ATTRIBUTES,
 };
-use windows::{core::{w, GUID}, Win32::System::Threading::CreateEventA};
+use windows::{
+    core::{w, GUID},
+    Win32::System::Threading::CreateEventA,
+};
 
 use crate::{
     direct_3d_device::Direct3DDevice,
@@ -253,12 +257,8 @@ impl MonitorContext {
 
             // create an event to get notified new cursor data
             let mouse_event = unsafe {
-                CreateEventA(
-                    None,
-                    false.into_param(),
-                    false.into_param(),
-                    "arbitraryMouseEventName".into_param(),
-                ).unwrap()
+                let c_str = CString::new("arbitraryMouseEventName").unwrap();
+                CreateEventA(None, false, false, c_str.as_ptr() as *const u8).unwrap()
             };
 
             // set up cursor capabilities
