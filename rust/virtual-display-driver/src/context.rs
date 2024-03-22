@@ -7,18 +7,22 @@ use std::{
 use anyhow::anyhow;
 use log::error;
 use wdf_umdf::{
-    IddCxAdapterInitAsync, IddCxError, IddCxMonitorArrival, IddCxMonitorCreate, WdfError,
-    WdfObjectDelete, WDF_DECLARE_CONTEXT_TYPE, IddCxMonitorSetupHardwareCursor
+    IddCxAdapterInitAsync, IddCxError, IddCxMonitorArrival, IddCxMonitorCreate,
+    IddCxMonitorSetupHardwareCursor, WdfError, WdfObjectDelete, WDF_DECLARE_CONTEXT_TYPE,
 };
 use wdf_umdf_sys::{
     DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY, HANDLE, IDARG_IN_ADAPTER_INIT, IDARG_IN_MONITORCREATE,
-    IDARG_OUT_ADAPTER_INIT, IDARG_OUT_MONITORARRIVAL, IDARG_OUT_MONITORCREATE, IDDCX_ADAPTER,
-    IDDCX_ADAPTER_CAPS, IDDCX_ENDPOINT_DIAGNOSTIC_INFO, IDDCX_ENDPOINT_VERSION,
-    IDDCX_FEATURE_IMPLEMENTATION, IDDCX_MONITOR, IDDCX_MONITOR_DESCRIPTION,
-    IDDCX_MONITOR_DESCRIPTION_TYPE, IDDCX_MONITOR_INFO, IDDCX_SWAPCHAIN, IDDCX_TRANSMISSION_TYPE,
-    LUID, NTSTATUS, WDFDEVICE, WDFOBJECT, WDF_OBJECT_ATTRIBUTES, IDARG_IN_SETUP_HWCURSOR,IDDCX_CURSOR_CAPS,IDDCX_XOR_CURSOR_SUPPORT_NONE
+    IDARG_IN_SETUP_HWCURSOR, IDARG_OUT_ADAPTER_INIT, IDARG_OUT_MONITORARRIVAL,
+    IDARG_OUT_MONITORCREATE, IDDCX_ADAPTER, IDDCX_ADAPTER_CAPS, IDDCX_CURSOR_CAPS,
+    IDDCX_ENDPOINT_DIAGNOSTIC_INFO, IDDCX_ENDPOINT_VERSION, IDDCX_FEATURE_IMPLEMENTATION,
+    IDDCX_MONITOR, IDDCX_MONITOR_DESCRIPTION, IDDCX_MONITOR_DESCRIPTION_TYPE, IDDCX_MONITOR_INFO,
+    IDDCX_SWAPCHAIN, IDDCX_TRANSMISSION_TYPE, IDDCX_XOR_CURSOR_SUPPORT, LUID, NTSTATUS, WDFDEVICE,
+    WDFOBJECT, WDF_OBJECT_ATTRIBUTES,
 };
-use windows::{core::{w, GUID}, Win32::System::Threading::CreateEventA};
+use windows::{
+    core::{w, GUID, src::Strings::PCSTR},
+    Win32::System::Threading::CreateEventA,
+};
 
 use crate::{
     direct_3d_device::Direct3DDevice,
@@ -254,7 +258,7 @@ impl MonitorContext {
             // create an event to get notified new cursor data
             let mouse_event = unsafe {
                 let c_str = std::ffi::CString::new("arbitraryMouseEventName").unwrap();
-                CreateEventA(None, false, false, c_str.as_ptr() as *const u8).unwrap()
+                CreateEventA(None, false, false, PCSTR(c_str.as_ptr() as *const u8)).unwrap()
             };
 
             // set up cursor capabilities
@@ -263,7 +267,7 @@ impl MonitorContext {
                 AlphaCursorSupport: 1,
                 MaxX: 64,
                 MaxY: 64,
-                ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT_NONE,
+                ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT,
             };
 
             // prepare IddCxMonitorSetupHardwareCursor arguments
@@ -272,10 +276,12 @@ impl MonitorContext {
                 hNewCursorDataAvailable: mouse_event, // this event will be called when new cursor data is available
             };
 
-            let status = IddCxMonitorSetupHardwareCursor(
-                m_Monitor, // handle to the monitor we want to enable hardware mouse on
-                &hw_cursor,
-            );
+            unsafe {
+                let status = IddCxMonitorSetupHardwareCursor(
+                    None,
+                    &hw_cursor,
+                );
+            }
         } else {
             // It's important to delete the swap-chain if D3D initialization fails, so that the OS knows to generate a new
             // swap-chain and try again.

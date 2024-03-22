@@ -254,3 +254,16 @@ pub unsafe fn IddCxMonitorDeparture(
         )
     )
 }
+
+#[rustfmt::skip]
+pub unsafe fn IddCxMonitorSetupHardwareCursor(
+    MonitorObject: IDDCX_MONITOR,
+    hw_cursor: IDARG_IN_SETUP_HWCURSOR 
+) {
+    IddCxCall!(
+        IddCxMonitorSetupHardwareCursor(
+            MonitorObject,
+            hw_cursor,
+        )
+    )
+}
