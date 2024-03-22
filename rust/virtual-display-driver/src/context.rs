@@ -20,7 +20,7 @@ use wdf_umdf_sys::{
     WDFOBJECT, WDF_OBJECT_ATTRIBUTES,
 };
 use windows::{
-    core::{w, GUID, src::Strings::PCSTR},
+    core::{w, GUID, strings::PCSTR},
     Win32::System::Threading::CreateEventA,
 };
 
@@ -256,7 +256,7 @@ impl MonitorContext {
             self.swap_chain_processor = Some(processor);
 
             // create an event to get notified new cursor data
-            let mouse_event = unsafe {
+            let mut mouse_event = unsafe {
                 let c_str = std::ffi::CString::new("arbitraryMouseEventName").unwrap();
                 CreateEventA(None, false, false, PCSTR(c_str.as_ptr() as *const u8)).unwrap()
             };
@@ -267,18 +267,19 @@ impl MonitorContext {
                 AlphaCursorSupport: 1,
                 MaxX: 64,
                 MaxY: 64,
-                ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT,
+                // IDDCX_XOR_CURSOR_SUPPORT_NONE
+                ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT(1),
             };
 
             // prepare IddCxMonitorSetupHardwareCursor arguments
             let hw_cursor = IDARG_IN_SETUP_HWCURSOR {
                 CursorInfo: cursor_info,
-                hNewCursorDataAvailable: mouse_event, // this event will be called when new cursor data is available
+                hNewCursorDataAvailable: &mut mouse_event as *mut std::ffi::c_void, // this event will be called when new cursor data is available
             };
 
             unsafe {
                 let status = IddCxMonitorSetupHardwareCursor(
-                    None,
+                    self.device.as_mut(),
                     &hw_cursor as *const IDARG_IN_SETUP_HWCURSOR,
                 );
             }
