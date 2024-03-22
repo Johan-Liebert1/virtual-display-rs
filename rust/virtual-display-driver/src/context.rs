@@ -279,7 +279,7 @@ impl MonitorContext {
             unsafe {
                 let status = IddCxMonitorSetupHardwareCursor(
                     None,
-                    &hw_cursor,
+                    &hw_cursor as *const IDARG_IN_SETUP_HWCURSOR,
                 );
             }
         } else {
