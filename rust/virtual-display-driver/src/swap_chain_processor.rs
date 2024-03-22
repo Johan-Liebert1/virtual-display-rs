@@ -8,7 +8,7 @@ use anyhow::anyhow;
 use log::error;
 use wdf_umdf::{
     IddCxAdapterInitAsync, IddCxError, IddCxMonitorArrival, IddCxMonitorCreate,
-    IddCxMonitorSetupHardwareCursor, WdfError, WdfObjectDelete, WDF_DECLARE_CONTEXT_TYPE,
+    WdfError, WdfObjectDelete, WDF_DECLARE_CONTEXT_TYPE,
 };
 use wdf_umdf_sys::{
     DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY, HANDLE, IDARG_IN_ADAPTER_INIT, IDARG_IN_MONITORCREATE,
@@ -254,32 +254,6 @@ impl MonitorContext {
             processor.run(swap_chain, device, new_frame_event);
 
             self.swap_chain_processor = Some(processor);
-
-            // create an event to get notified new cursor data
-            let mouse_event = unsafe {
-                let c_str = CString::new("arbitraryMouseEventName").unwrap();
-                CreateEventA(None, false, false, c_str.as_ptr() as *const u8).unwrap()
-            };
-
-            // set up cursor capabilities
-            let cursor_info = IDDCX_CURSOR_CAPS {
-                Size: size_of::<IDDCX_CURSOR_CAPS>() as u32,
-                AlphaCursorSupport: 1,
-                MaxX: 64,
-                MaxY: 64,
-                ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT_NONE,
-            };
-
-            // prepare IddCxMonitorSetupHardwareCursor arguments
-            let hw_cursor = IDARG_IN_SETUP_HWCURSOR {
-                CursorInfo: cursor_info,
-                hNewCursorDataAvailable: mouse_event, // this event will be called when new cursor data is available
-            };
-
-            let status = IddCxMonitorSetupHardwareCursor(
-                m_Monitor, // handle to the monitor we want to enable hardware mouse on
-                &hw_cursor,
-            );
         } else {
             // It's important to delete the swap-chain if D3D initialization fails, so that the OS knows to generate a new
             // swap-chain and try again.

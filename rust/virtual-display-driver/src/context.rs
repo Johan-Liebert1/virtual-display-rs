@@ -8,7 +8,7 @@ use anyhow::anyhow;
 use log::error;
 use wdf_umdf::{
     IddCxAdapterInitAsync, IddCxError, IddCxMonitorArrival, IddCxMonitorCreate, WdfError,
-    WdfObjectDelete, WDF_DECLARE_CONTEXT_TYPE,
+    WdfObjectDelete, WDF_DECLARE_CONTEXT_TYPE, IddCxMonitorSetupHardwareCursor
 };
 use wdf_umdf_sys::{
     DISPLAYCONFIG_VIDEO_OUTPUT_TECHNOLOGY, HANDLE, IDARG_IN_ADAPTER_INIT, IDARG_IN_MONITORCREATE,
@@ -16,7 +16,7 @@ use wdf_umdf_sys::{
     IDDCX_ADAPTER_CAPS, IDDCX_ENDPOINT_DIAGNOSTIC_INFO, IDDCX_ENDPOINT_VERSION,
     IDDCX_FEATURE_IMPLEMENTATION, IDDCX_MONITOR, IDDCX_MONITOR_DESCRIPTION,
     IDDCX_MONITOR_DESCRIPTION_TYPE, IDDCX_MONITOR_INFO, IDDCX_SWAPCHAIN, IDDCX_TRANSMISSION_TYPE,
-    LUID, NTSTATUS, WDFDEVICE, WDFOBJECT, WDF_OBJECT_ATTRIBUTES, IDDCX_CURSOR_CAPS, IDARG_IN_SETUP_HWCURSOR
+    LUID, NTSTATUS, WDFDEVICE, WDFOBJECT, WDF_OBJECT_ATTRIBUTES, IDDCX_CURSOR_CAPS, IDARG_IN_SETUP_HWCURSOR,IDDCX_CURSOR_CAPS
 };
 use windows::{core::{w, GUID}, Win32::System::Threading::CreateEventA};
 
@@ -253,18 +253,14 @@ impl MonitorContext {
 
             // create an event to get notified new cursor data
             let mouse_event = unsafe {
-                CreateEventA(
-                    None,
-                    false.into_param(),
-                    false.into_param(),
-                    "arbitraryMouseEventName".into_param(),
-                ).unwrap()
+                let c_str = CString::new("arbitraryMouseEventName").unwrap();
+                CreateEventA(None, false, false, c_str.as_ptr() as *const u8).unwrap()
             };
 
             // set up cursor capabilities
             let cursor_info = IDDCX_CURSOR_CAPS {
                 Size: size_of::<IDDCX_CURSOR_CAPS>() as u32,
-                AlphaCursorSupport: true,
+                AlphaCursorSupport: 1,
                 MaxX: 64,
                 MaxY: 64,
                 ColorXorCursorSupport: IDDCX_XOR_CURSOR_SUPPORT_NONE,
