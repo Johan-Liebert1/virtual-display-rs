@@ -12,8 +12,6 @@ win-pipes = { git = "https://github.com/MolotovCherry/WinPipes-rs" }
 serde_json = "1.0.114"
 driver-ipc = { path = "../driver-ipc" }
 eyre = "0.6.12"
-
-[target.'cfg(windows)'.dependencies]
 winreg = "0.52.0"
 
 [lints]

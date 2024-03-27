@@ -6,8 +6,6 @@
 // stand-in type replacing NTSTATUS in the bindings
 use crate::NTSTATUS;
 
-compiler_println!("env!(\"OUT_DIR\"): {}", env!("OUT_DIR"));
-
 include!(concat!(env!("OUT_DIR"), "/umdf.rs"));
 
 // required for some macros

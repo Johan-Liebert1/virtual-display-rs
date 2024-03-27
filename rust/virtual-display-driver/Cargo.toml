@@ -20,8 +20,6 @@ serde_json = "1.0.114"
 driver-ipc = { path = "../driver-ipc" }
 driver-logger = { path = "../driver-logger" }
 win-pipes = { git = "https://github.com/MolotovCherry/WinPipes-rs" }
-
-[target.'cfg(windows)'.dependencies]
 winreg = "0.52.0"
 
 [dependencies.windows]
