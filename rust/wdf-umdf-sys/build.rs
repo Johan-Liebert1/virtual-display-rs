@@ -1,6 +1,9 @@
 use bindgen::Abi;
 use std::path::PathBuf;
+
+#[cfg(target_os = "windows")]
 use winreg::enums::HKEY_LOCAL_MACHINE;
+#[cfg(target_os = "windows")]
 use winreg::RegKey;
 
 #[derive(Debug, thiserror::Error)]
@@ -16,6 +19,7 @@ pub enum Error {
 ///
 /// # Errors
 /// Returns IO error if failed
+#[cfg(target_os = "windows")]
 pub fn get_windows_kits_dir() -> Result<PathBuf, Error> {
     let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
     let key = r"SOFTWARE\Microsoft\Windows Kits\Installed Roots";
@@ -35,6 +39,7 @@ pub enum DirectoryType {
 ///
 /// # Errors
 /// Returns IO error if failed
+#[cfg(target_os = "windows")]
 pub fn get_um_dir(dir_type: DirectoryType) -> Result<PathBuf, Error> {
     // We first append lib to the path and read the directory..
     let dir = get_windows_kits_dir()?
@@ -70,6 +75,7 @@ pub fn get_um_dir(dir_type: DirectoryType) -> Result<PathBuf, Error> {
 
 /// # Errors
 /// Returns IO error if failed
+#[cfg(target_os = "windows")]
 pub fn get_umdf_dir(dir_type: DirectoryType) -> Result<PathBuf, Error> {
     Ok(get_windows_kits_dir()?.join(match dir_type {
         DirectoryType::Include => PathBuf::from_iter(["Include", "wdf", "umdf", "2.31"]),
@@ -82,6 +88,7 @@ pub fn get_umdf_dir(dir_type: DirectoryType) -> Result<PathBuf, Error> {
 ///
 /// # Errors
 /// Returns IO error if failed
+#[cfg(target_os = "windows")]
 pub fn get_shared_dir() -> Result<PathBuf, Error> {
     // We first append lib to the path and read the directory..
     let dir = get_windows_kits_dir()?.join("Include").read_dir()?;
@@ -106,12 +113,14 @@ pub fn get_shared_dir() -> Result<PathBuf, Error> {
     Ok(dir.join("shared"))
 }
 
+#[cfg(target_os = "windows")]
 fn build_dir() -> PathBuf {
     PathBuf::from(
         std::env::var_os("OUT_DIR").expect("the environment variable OUT_DIR is undefined"),
     )
 }
 
+#[cfg(target_os = "windows")]
 fn generate() {
     // Find the include directory containing the user headers.
     let include_um_dir = get_um_dir(DirectoryType::Include).unwrap();
@@ -189,8 +198,13 @@ fn generate() {
     umdf.write_to_file(out_path.join("umdf.rs")).unwrap();
 }
 
+#[cfg(target_os = "windows")]
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-
     generate();
+}
+
+#[cfg(not(target_os = "windows"))]
+fn main() {
+    println!("owned by skill issue")
 }
